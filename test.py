@@ -1,13 +1,11 @@
 import cv2
 import numpy as np
-import argparse
+import argparse,os
 
 
 
-#area of various coins
-AREA_EURO_mm = (23.25/(2*np.pi))**2*np.pi
-
-#--
+#area of various coins in mm
+coin_areas={"1 euro":(23.25/(2*np.pi))**2*np.pi}
 
 
 
@@ -20,9 +18,16 @@ def main(args):
     upper = np.array([90,90,255]) 
     lower = np.array([0,0,40])
     green_perc=detect_color(lower,upper,cimg)
+    volume = beta_volume_prop(coin_area,green_perc,"1 euro")
+    print('\n'*20+f"detected area:{volume}"+'\n'*8)
+
+def beta_volume_prop(coin_area,green_perc,coin_type):
+    stimated_height=12#mm
+    volume = (green_perc*coin_areas[coin_type])*coin_area*stimated_height
+    return volume
 
 
-def Area(radius):
+def circle_area(radius):
     return radius**2*np.pi
 
 def detect_circles(img):
@@ -43,7 +48,7 @@ def detect_circles(img):
         cv2.circle(img,(coin[0],coin[1]),coin[2],(0,255,0),2)
         # draw the center of the circle
         cv2.circle(img,(coin[0],coin[1]),2,(0,0,255),3)
-        return (Area(radius=coin[2])/img.size)*300
+        return (circle_area(radius=coin[2])/img.size)*300
         #cv2.imshow('detected circles',img)
         #cv2.waitKey(0)
 
@@ -55,16 +60,14 @@ def detect_color(lower,upper,img):
     mask = cv2.inRange(img,lower,upper)
 
     # Check out the binary mask:
-    cv2.imshow("binary mask", mask)
-    cv2.waitKey(0)
+    #cv2.imshow("binary mask", mask)
+    #cv2.waitKey(0)
 
     # Now, you AND the mask and the input image
     # All the pixels that are white in the mask will
     # survive the AND operation, all the black pixels
     # will remain black
     output = cv2.bitwise_and(img, img, mask=mask)
-
-    # Check out the ANDed mask:
     cv2.imshow("ANDed mask", output)
     cv2.waitKey(0)
 
