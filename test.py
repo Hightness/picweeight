@@ -17,8 +17,8 @@ def main(args):
     cimg = cv2.imread(args["image"])
     coin_area=detect_circles(img)
     if not coin_area:return
-    lower = np.array([200,0,0]) 
-    upper = np.array([250,250,255])
+    upper = np.array([90,90,255]) 
+    lower = np.array([0,0,40])
     green_perc=detect_color(lower,upper,cimg)
 
 
@@ -28,7 +28,7 @@ def Area(radius):
 def detect_circles(img):
     circles = cv2.HoughCircles(img,cv2.HOUGH_GRADIENT,1,20,param1=50,param2=30,minRadius=0,maxRadius=100)
     circles = np.uint16(np.around(circles))[0,:]
-    if len(circles)<1:
+    if len(circles)==1:
         print("too many coins in image")
         for i in circles:
             cv2.circle(img,(i[0],i[1]),i[2],(0,255,0),2)
@@ -49,6 +49,8 @@ def detect_circles(img):
 
 def detect_color(lower,upper,img):
 
+    cv2.imshow("image", img)
+    cv2.waitKey(0)
     #image_copy = np.copy(img)
     mask = cv2.inRange(img,lower,upper)
 
@@ -76,9 +78,6 @@ def detect_color(lower,upper,img):
     # This is the color percent calculation, considering the resize I did earlier.
     colorPercent = (ratio_green * 100)
     return colorPercent
-
-    # Print the color percent, use 2 figures past the decimal point
-    print('green pixel percentage:', colorPercent)
 
     # numpy's hstack is used to stack two images horizontally,
     # so you see the various images generated in one figure:
